@@ -20,7 +20,7 @@ import sys
 import pyodbc
 
 from db.db_manager import get_connection
-from ingestion.ingestion_manager import run_ingestion
+from ingestion_platform.ingestion.ingestion_manager import run_ingestion
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -130,7 +130,7 @@ def main(source_id: int | None = None) -> None:
         for name, ok in summary["results"].items():
             if not ok:
                 log.warning("  ✗ %s", name)
-        sys.exit(1)   # afslut med fejlkode så task scheduler/cron kan reagere
+        sys.exit(1)   # afslut med fejlkode så task scheduler kan reagere
 
     sys.exit(0)
 
