@@ -8,12 +8,14 @@ så kildespecifikke scripts kun skal fokusere på at hente data og gemme data r�
 """
 
 from abc import ABC, abstractmethod
+from pathlib import Path
 import pandas as pd
-from db.db_manager import Configuration_manager
+from ingestion_platform.db.db_manager import Configuration_manager
 
 class BaseIngestion(ABC):
 
     db_manager: Configuration_manager
+    LAKE_ROOT = Path(__file__).resolve().parent.parent / "lake"
     def __init__(self, source_id: int, source_name: str, config: dict) -> None:
         self.source_id = source_id
         self.source_name = source_name
@@ -39,10 +41,9 @@ class BaseIngestion(ABC):
         pass
 
     def _write_to_parquet(self, df: pd.DataFrame, path: str) -> None:
-        """
-        Hjælpefunktion til at gemme DataFrame som Parquet.
-        """
-        df.to_parquet(path, index=False)
+        full_path = self.LAKE_ROOT / path
+        full_path.parent.mkdir(parents=True, exist_ok=True)
+        df.to_parquet(full_path, index=False)
 
     def _log(self, message: str, log_type: str = "INFO") -> None:
         self.db_manager.log(message, log_type)

@@ -1,8 +1,8 @@
 import requests
 import pandas as pd
-from base_ingestion import BaseIngestion
+from ingestion_platform.ingestion.base_ingestion import BaseIngestion
 
-class CoinGeckoIngestor(BaseIngestion):
+class CoingeckoIngestor(BaseIngestion):  # var CoinGeckoIngestor
 
     def __init__(self, source_id: int, source_name: str, config: dict):
         super().__init__(source_id, source_name, config)
@@ -15,7 +15,7 @@ class CoinGeckoIngestor(BaseIngestion):
         return pd.DataFrame(data)
 
     def save_raw_data(self, df: pd.DataFrame) -> None:
-        path = f"lake/{self.source_name}/{pd.Timestamp.now().strftime('%Y/%m/%d/%H/%M')}/data.parquet"
+        path = f"{self.source_name}/{pd.Timestamp.now().strftime('%Y/%m/%d/%H/%M')}/data.parquet"
         self._write_to_parquet(df, path)
         self._log(f"Data gemt: {path}")
 

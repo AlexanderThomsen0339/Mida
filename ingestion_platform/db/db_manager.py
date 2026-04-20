@@ -3,17 +3,16 @@ db_manager.py
 -------------
 Håndterer forbindelse til Configuration_database og kalder stored procedures
 for job-styring og logging.
-
 Kræver: pip install pyodbc python-dotenv
 """
-
 import os
 import logging
 import pyodbc
 from contextlib import contextmanager
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent.parent / ".env", override=True)
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -29,13 +28,11 @@ log = logging.getLogger(__name__)
 # Forbindelses-hjælper
 # ---------------------------------------------------------------------------
 def _build_connection_string() -> str:
-    """Bygger ODBC connection string fra miljøvariabler."""
     return (
         "DRIVER={ODBC Driver 17 for SQL Server};"
         f"SERVER={os.environ['DB_SERVER']};"
         f"DATABASE={os.environ.get('DB_NAME', 'Configuration_database')};"
-        f"UID={os.environ['DB_USER']};"
-        f"PWD={os.environ['DB_PASSWORD']};"
+        "Trusted_Connection=yes;"
         "TrustServerCertificate=yes;"
     )
 
@@ -129,7 +126,7 @@ def insert_job_log(job_id: int, log_type: str, message: str) -> None:
     with get_connection() as conn:
         conn.cursor().execute(sql, job_id, log_type, message)
     log.debug("Log indsat — JobID=%d, Type='%s'", job_id, log_type)
-    
+
 def get_sources() -> list[dict]:
     """
     Kalder sp_GetSources og returnerer alle kilder som en liste af dicts.
@@ -140,6 +137,19 @@ def get_sources() -> list[dict]:
         cursor.execute(sql)
         columns = [col[0] for col in cursor.description]
         return [dict(zip(columns, row)) for row in cursor.fetchall()]
+    
+def get_source(source_id: int) -> dict | None:
+    """
+    Kalder sp_GetSources med et specifikt SourceID og returnerer kilden som dict.
+    Returnerer None hvis kilden ikke findes.
+    """
+    sql = "EXEC sp_GetSources @SourceID = ?;"
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql, source_id)
+        columns = [col[0] for col in cursor.description]
+        row = cursor.fetchone()
+    return dict(zip(columns, row)) if row else None
 
 
 # ---------------------------------------------------------------------------

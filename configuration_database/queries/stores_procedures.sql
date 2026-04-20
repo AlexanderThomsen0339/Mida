@@ -50,3 +50,22 @@ BEGIN
     VALUES (@JobID, GETDATE(), @Type, @Message);
 END;
 GO
+
+-- ============================================================
+-- SP: Hent kilder
+-- ============================================================
+CREATE OR ALTER PROCEDURE sp_GetSources
+    @SourceID INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT 
+        SourceID,
+        SourceName,
+        Source_URL,
+        Authentication,
+        UPDATED_AT
+    FROM dbo.Sources
+    WHERE @SourceID IS NULL OR SourceID = @SourceID;
+END;
+GO
