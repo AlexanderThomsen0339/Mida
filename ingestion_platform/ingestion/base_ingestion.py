@@ -17,8 +17,8 @@ class BaseIngestion(ABC):
     def __init__(self, source_id: int, source_name: str, config: dict) -> None:
         self.source_id = source_id
         self.source_name = source_name
-        self.config = config
-        self.db_manager = Configuration_manager()
+        self.config = config    
+        self.db_manager = Configuration_manager(source_id)
         super().__init__()
 
     @abstractmethod
@@ -35,6 +35,7 @@ class BaseIngestion(ABC):
         Gem rå data i laken.
         Skal implementeres af kildespecifikke ingest.py-scripts.
         """
+        self._write_to_parquet(df, f"lake/{self.source_name}/raw/{pd.Timestamp.now().strftime('%Y/%m/%d/%H%M%S')}.parquet")
         pass
 
     def _write_to_parquet(self, df: pd.DataFrame, path: str) -> None:
@@ -42,3 +43,6 @@ class BaseIngestion(ABC):
         Hjælpefunktion til at gemme DataFrame som Parquet.
         """
         df.to_parquet(path, index=False)
+
+    def _log(self, message: str, log_type: str = "INFO") -> None:
+        self.db_manager.log(message, log_type)

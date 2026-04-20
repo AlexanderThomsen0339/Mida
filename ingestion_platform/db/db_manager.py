@@ -129,6 +129,17 @@ def insert_job_log(job_id: int, log_type: str, message: str) -> None:
     with get_connection() as conn:
         conn.cursor().execute(sql, job_id, log_type, message)
     log.debug("Log indsat — JobID=%d, Type='%s'", job_id, log_type)
+    
+def get_sources() -> list[dict]:
+    """
+    Kalder sp_GetSources og returnerer alle kilder som en liste af dicts.
+    """
+    sql = "EXEC sp_GetSources @SourceID = NULL;"
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        columns = [col[0] for col in cursor.description]
+        return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 
 # ---------------------------------------------------------------------------
