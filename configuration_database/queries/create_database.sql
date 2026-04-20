@@ -30,3 +30,19 @@ CREATE TABLE Job_logs (
         REFERENCES Jobs(JobID)
 );
 GO
+
+CREATE OR ALTER PROCEDURE sp_GetSources
+    @SourceID INT = NULL   -- NULL = hent alle, ellers hent specifik kilde
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT
+        SourceID,
+        SourceName,
+        Source_URL,
+        Authentication
+    FROM Sources
+    WHERE @SourceID IS NULL
+       OR SourceID = @SourceID;
+END;
+GO
