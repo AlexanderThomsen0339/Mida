@@ -69,3 +69,48 @@ BEGIN
     WHERE @SourceID IS NULL OR SourceID = @SourceID;
 END;
 GO
+
+-- ============================================================
+-- SP: Hent jobs
+-- ============================================================
+
+CREATE PROCEDURE sp_GetJobs
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT JobID, SourceID, Timestamp, Status
+    FROM dbo.Jobs
+    ORDER BY Timestamp DESC;
+END;
+GO
+
+-- ============================================================
+-- SP: Hent Logs for et job
+-- ============================================================
+
+CREATE PROCEDURE sp_GetJobLogs
+    @JobID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT RunID, JobID, Timestamp, Type, Message
+    FROM dbo.Job_logs
+    WHERE JobID = @JobID
+    ORDER BY Timestamp ASC;
+END;
+GO
+
+-- ============================================================
+-- SP: Hent bruger
+-- ============================================================
+
+CREATE PROCEDURE sp_GetUser
+    @Username NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT UserID, Username, Password
+    FROM dbo.Users
+    WHERE Username = @Username;
+END;
+GO

@@ -10,7 +10,7 @@ så kildespecifikke scripts kun skal fokusere på at hente data og gemme data r�
 from abc import ABC, abstractmethod
 from pathlib import Path
 import pandas as pd
-from ingestion_platform.db.db_manager import Configuration_manager
+from shared.db_manager import Configuration_manager
 
 class BaseIngestion(ABC):
 

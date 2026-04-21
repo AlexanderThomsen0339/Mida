@@ -2,7 +2,7 @@
 Kalder alle extractors i ingestion/sources/ og gemmer data i Laken.
 """
 import importlib
-from db.db_manager import get_sources, Configuration_manager, log
+from shared.db_manager import get_sources, Configuration_manager, log
 
 
 def get_ingestor_class(source_name: str):

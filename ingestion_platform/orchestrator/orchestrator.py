@@ -16,7 +16,7 @@ Kan køres:
 import argparse
 import sys
 
-from ingestion_platform.db.db_manager import get_sources, get_source, log
+from shared.db_manager import get_sources, get_source, log
 from ingestion_platform.ingestion.ingestion_manager import run_ingestion
 
 # ---------------------------------------------------------------------------

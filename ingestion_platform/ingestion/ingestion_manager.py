@@ -6,7 +6,7 @@ Kaldes af orkestratoren.
 """
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from ingestion_platform.db.db_manager import Configuration_manager, log
+from shared.db_manager import Configuration_manager, log
 import importlib
 
 def _get_ingestor_class(source_name: str):

@@ -12,7 +12,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent.parent / ".env", override=True)
+load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env", override=True)
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -23,6 +23,24 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
+
+def get_jobs() -> list[dict]:
+    """Returnerer alle jobs fra databasen."""
+    sql = "EXEC sp_GetJobs;"
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        columns = [col[0] for col in cursor.description]
+        return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+def get_job_logs(job_id: int) -> list[dict]:
+    """Returnerer alle logs for et specifikt job."""
+    sql = "EXEC sp_GetJobLogs @JobID = ?;"
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql, job_id)
+        columns = [col[0] for col in cursor.description]
+        return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 # ---------------------------------------------------------------------------
 # Forbindelses-hjælper
