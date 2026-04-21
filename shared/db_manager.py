@@ -23,7 +23,22 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# Users
+# ---------------------------------------------------------------------------
+def get_user(username: str) -> dict | None:
+    """Returnerer én bruger fra databasen via sp_GetUser."""
+    sql = "EXEC sp_GetUser @Username = ?;"
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql, username)
+        columns = [col[0] for col in cursor.description]
+        row = cursor.fetchone()
+    return dict(zip(columns, row)) if row else None
 
+# ---------------------------------------------------------------------------
+# Jobs
+# ---------------------------------------------------------------------------
 def get_jobs() -> list[dict]:
     """Returnerer alle jobs fra databasen."""
     sql = "EXEC sp_GetJobs;"

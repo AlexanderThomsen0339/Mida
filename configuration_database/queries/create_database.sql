@@ -50,6 +50,6 @@ GO
 CREATE TABLE Users (
     UserID    INT IDENTITY PRIMARY KEY,
     Username  NVARCHAR(100) NOT NULL UNIQUE,
-    Password  NVARCHAR(255) NOT NULL,  -- bcrypt hash
+    Password  NVARCHAR(255) NOT NULL,
     CreatedAt DATETIME DEFAULT GETDATE()
 );
