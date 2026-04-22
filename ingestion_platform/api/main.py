@@ -1,6 +1,7 @@
 # ingestion_platform/api/main.py
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from ingestion_platform.orchestrator.orchestrator import main as run_orchestrator
+from ingestion_platform.serving.reader import get_latest_data
 import threading
 
 app = FastAPI()
@@ -14,3 +15,11 @@ def trigger_all():
 def trigger_one(source_id: int):
     threading.Thread(target=run_orchestrator, kwargs={"source_id": source_id}).start()
     return {"status": "started", "source_id": source_id}
+
+@app.get("/data/{source_name}")
+def get_data(source_name: str, page: int = 1, limit: int = 50):
+    print(f"page={page}, limit={limit}")
+    try:
+        return get_latest_data(source_name, page=page, limit=limit)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
