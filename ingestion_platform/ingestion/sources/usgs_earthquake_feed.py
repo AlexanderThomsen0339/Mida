@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 from ingestion_platform.ingestion.base_ingestion import BaseIngestion
 
-class EarthquakeIngestor(BaseIngestion):
+class UsgsEarthquakeFeedIngestor(BaseIngestion):
     def __init__(self, source_id: int, source_name: str, config: dict):
         super().__init__(source_id, source_name, config)
 
@@ -10,10 +10,8 @@ class EarthquakeIngestor(BaseIngestion):
         self._log("Henter data fra USGS Earthquake API...")
         response = requests.get(self.config["api_url"])
         response.raise_for_status()
-        data = response.json()
-        features = data.get("features", [])
-        rows = [f["properties"] for f in features]
-        return pd.DataFrame(rows)
+        features = response.json().get("features", [])
+        return pd.DataFrame([f["properties"] for f in features])
 
     def save_raw_data(self, df: pd.DataFrame) -> None:
         path = f"{self.source_name}/{pd.Timestamp.now().strftime('%Y/%m/%d/%H/%M')}/data.parquet"

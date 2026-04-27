@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 from ingestion_platform.ingestion.base_ingestion import BaseIngestion
 
-class CoingeckoIngestor(BaseIngestion):  # var CoinGeckoIngestor
+class CoingeckoMarketsIngestor(BaseIngestion):
 
     def __init__(self, source_id: int, source_name: str, config: dict):
         super().__init__(source_id, source_name, config)
@@ -11,8 +11,7 @@ class CoingeckoIngestor(BaseIngestion):  # var CoinGeckoIngestor
         self._log("Henter data fra CoinGecko API...")
         response = requests.get(self.config["api_url"])
         response.raise_for_status()
-        data = response.json()
-        return pd.DataFrame(data)
+        return pd.DataFrame(response.json())
 
     def save_raw_data(self, df: pd.DataFrame) -> None:
         path = f"{self.source_name}/{pd.Timestamp.now().strftime('%Y/%m/%d/%H/%M')}/data.parquet"

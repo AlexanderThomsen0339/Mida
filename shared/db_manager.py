@@ -65,7 +65,8 @@ def _build_connection_string() -> str:
         "DRIVER={ODBC Driver 17 for SQL Server};"
         f"SERVER={os.environ['DB_SERVER']};"
         f"DATABASE={os.environ.get('DB_NAME', 'Configuration_database')};"
-        "Trusted_Connection=yes;"
+        f"UID={os.environ['DB_USER']};"
+        f"PWD={os.environ['DB_PASSWORD']};"
         "TrustServerCertificate=yes;"
     )
 
