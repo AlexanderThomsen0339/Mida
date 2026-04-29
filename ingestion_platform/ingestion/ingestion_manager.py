@@ -37,11 +37,14 @@ def run_source(source: dict) -> bool:
         return False
 
 def _update_cache(succeeded_sources: list[str]) -> None:
+    import math
     import pandas as pd
-    from pathlib import Path
     
     LAKE_ROOT = Path(__file__).resolve().parent.parent / "lake"
     cache = {}
+
+    def _clean_record(record: dict) -> dict:
+        return {k: None if isinstance(v, float) and math.isnan(v) else v for k, v in record.items()}
     
     for source_name in succeeded_sources:
         try:
@@ -50,10 +53,10 @@ def _update_cache(succeeded_sources: list[str]) -> None:
             if not parquet_files:
                 raise FileNotFoundError(f"Ingen parquet filer fundet for '{source_name}'")
             df = pd.read_parquet(parquet_files[-1])
-            df = df.where(pd.notnull(df), None)
+            records = [_clean_record(r) for r in df.to_dict(orient="records")]
             cache[source_name] = {
-                "total": len(df),
-                "data":  df.to_dict(orient="records")
+                "total": len(records),
+                "data":  records
             }
         except Exception as e:
             log.error("Kunne ikke cache '%s': %s", source_name, e)

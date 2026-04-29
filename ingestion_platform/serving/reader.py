@@ -7,7 +7,7 @@ def get_latest_data(source_name: str, page: int = 1, limit: int = 50) -> dict:
     if not CACHE_PATH.exists():
         raise FileNotFoundError("Cache findes ikke endnu")
     
-    cache = json.loads(CACHE_PATH.read_text())
+    cache = json.loads(CACHE_PATH.read_text(encoding="utf-8"))
     
     if source_name not in cache:
         raise KeyError(f"Ingen data i cache for kilde '{source_name}'")
@@ -25,3 +25,4 @@ def get_latest_data(source_name: str, page: int = 1, limit: int = 50) -> dict:
         "total_pages": -(-total // limit),
         "data":        records[start:end]
     }
+
