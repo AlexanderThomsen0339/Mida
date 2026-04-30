@@ -2,31 +2,47 @@ FROM python:3.11-slim
 
 ENV ACCEPT_EULA=Y
 
+# System dependencies
 RUN apt-get update && apt-get install -y \
     curl \
-    gnupg2 \
+    gnupg \
     apt-transport-https \
+    ca-certificates \
     gcc \
     g++ \
     unixodbc \
-    unixodbc-dev
+    unixodbc-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Microsoft repo (Debian 11 = stabil for msodbcsql17)
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
-    curl https://packages.microsoft.com/config/debian/11/prod.list \
+# -----------------------------
+# Microsoft ODBC Driver Setup
+# -----------------------------
+
+# Add Microsoft GPG key (modern way)
+RUN curl -sSL https://packages.microsoft.com/keys/microsoft.asc \
+    | gpg --dearmor \
+    | tee /usr/share/keyrings/microsoft-prod.gpg > /dev/null
+
+# Add Microsoft repository (Debian 11 = stable for msodbcsql17)
+RUN echo "deb [signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/debian/11/prod bullseye main" \
     > /etc/apt/sources.list.d/mssql-release.list
 
+# Install ODBC driver
 RUN apt-get update && ACCEPT_EULA=Y apt-get install -y \
-    msodbcsql17
+    msodbcsql17 \
+    && rm -rf /var/lib/apt/lists/*
 
-# verify driver exists (debug safety)
-RUN odbcinst -q -d
+# -----------------------------
+# App setup
+# -----------------------------
 
 WORKDIR /app
 
 COPY requirements.txt .
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# Railway uses PORT env var
 CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port $PORT"]
