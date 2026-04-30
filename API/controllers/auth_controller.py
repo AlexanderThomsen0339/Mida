@@ -1,5 +1,5 @@
 from shared.db_manager import get_user
-from API.core.security import verify_password, create_access_token
+from core.security import verify_password, create_access_token
 from fastapi import HTTPException, status
 
 def login(username: str, password: str) -> dict:

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
-from API.controllers.source_controller import get_all_sources, get_single_source
-from API.core.security import get_current_user
+from controllers.source_controller import get_all_sources, get_single_source
+from core.security import get_current_user
 
 router = APIRouter()
 

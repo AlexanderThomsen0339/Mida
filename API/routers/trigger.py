@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
-from API.controllers.trigger_controller import trigger_all, trigger_source
-from API.core.security import get_current_user
+from controllers.trigger_controller import trigger_all, trigger_source
+from core.security import get_current_user
 
 router = APIRouter()
 

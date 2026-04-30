@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
-from API.controllers.jobs_controller import get_all_jobs, get_logs_for_job
-from API.core.security import get_current_user
+from controllers.jobs_controller import get_all_jobs, get_logs_for_job
+from core.security import get_current_user
 
 router = APIRouter()
 

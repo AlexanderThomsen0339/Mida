@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from API.models.auth import LoginRequest, TokenResponse
-from API.controllers.auth_controller import login
+from models.auth import LoginRequest, TokenResponse
+from controllers.auth_controller import login
 
 router = APIRouter()
 
