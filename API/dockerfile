@@ -1,5 +1,8 @@
 FROM python:3.11-slim
 
+# -------------------------------------------------
+# System dependencies
+# -------------------------------------------------
 RUN apt-get update && apt-get install -y \
     curl \
     gnupg \
@@ -10,38 +13,38 @@ RUN apt-get update && apt-get install -y \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# ----------------------------
-# Microsoft ODBC repo (FIXED)
-# ----------------------------
+# -------------------------------------------------
+# Microsoft ODBC Driver setup (FIXED)
+# -------------------------------------------------
 RUN mkdir -p /etc/apt/keyrings
 
 RUN curl -sSL https://packages.microsoft.com/keys/microsoft.asc \
     | gpg --dearmor \
     | tee /etc/apt/keyrings/microsoft.gpg > /dev/null
 
-RUN echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] \
-https://packages.microsoft.com/debian/11/prod bullseye main" \
+RUN echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/debian/11/prod bullseye main" \
     > /etc/apt/sources.list.d/mssql-release.list
 
-# ----------------------------
-# Install ODBC driver
-# ----------------------------
+# -------------------------------------------------
+# Install SQL Server ODBC driver
+# -------------------------------------------------
 RUN apt-get update && ACCEPT_EULA=Y apt-get install -y \
     msodbcsql17 \
     && rm -rf /var/lib/apt/lists/*
 
-# Workdir
+# -------------------------------------------------
+# App setup
+# -------------------------------------------------
 WORKDIR /app
 
-# Python deps
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy app
 COPY . .
 
-# Railway kræver PORT env → brug den
+# -------------------------------------------------
+# IMPORTANT: Railway uses PORT env variable
+# -------------------------------------------------
 ENV PORT=8000
 
-# Start app (IMPORTANT: bind til 0.0.0.0 + PORT)
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT}"]
+CMD ["sh", "-c", "uvicorn ingestion_platform.api.main:app --host 0.0.0.0 --port ${PORT}"]
