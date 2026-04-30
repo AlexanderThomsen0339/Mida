@@ -25,6 +25,10 @@ RUN apt-get update && ACCEPT_EULA=Y apt-get install -y \
     msodbcsql17 \
     && rm -rf /var/lib/apt/lists/*
 
+RUN pip install --no-cache-dir \
+    "bcrypt==4.1.2" \
+    "passlib[bcrypt]==1.7.4"
+
 # Workdir
 WORKDIR /app
 
