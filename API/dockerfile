@@ -1,50 +1,64 @@
 FROM python:3.11-slim
 
-# -------------------------------------------------
+# ---------------------------
 # System dependencies
-# -------------------------------------------------
+# ---------------------------
 RUN apt-get update && apt-get install -y \
     curl \
     gnupg \
+    apt-transport-https \
     ca-certificates \
-    unixodbc \
-    unixodbc-dev \
     gcc \
     g++ \
+    unixodbc \
+    unixodbc-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# -------------------------------------------------
-# Microsoft ODBC Driver setup (FIXED)
-# -------------------------------------------------
-RUN mkdir -p /etc/apt/keyrings
-
+# ---------------------------
+# Microsoft ODBC Driver repo
+# ---------------------------
 RUN curl -sSL https://packages.microsoft.com/keys/microsoft.asc \
     | gpg --dearmor \
-    | tee /etc/apt/keyrings/microsoft.gpg > /dev/null
-
-RUN echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/debian/11/prod bullseye main" \
+    > /usr/share/keyrings/microsoft.gpg \
+    && curl -sSL https://packages.microsoft.com/config/debian/11/prod.list \
     > /etc/apt/sources.list.d/mssql-release.list
 
-# -------------------------------------------------
-# Install SQL Server ODBC driver
-# -------------------------------------------------
+# ---------------------------
+# ODBC Driver (SQL Server)
+# ---------------------------
 RUN apt-get update && ACCEPT_EULA=Y apt-get install -y \
     msodbcsql17 \
     && rm -rf /var/lib/apt/lists/*
 
-# -------------------------------------------------
-# App setup
-# -------------------------------------------------
+# ---------------------------
+# Python security deps (bcrypt fix)
+# ---------------------------
+RUN pip install --no-cache-dir \
+    "bcrypt==4.1.2" \
+    "passlib[bcrypt]==1.7.4"
+
+# ---------------------------
+# Workdir
+# ---------------------------
 WORKDIR /app
 
+# ---------------------------
+# Python dependencies
+# ---------------------------
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# ---------------------------
+# App source
+# ---------------------------
 COPY . .
 
-# -------------------------------------------------
-# IMPORTANT: Railway uses PORT env variable
-# -------------------------------------------------
+# ---------------------------
+# Railway port config
+# ---------------------------
 ENV PORT=8000
 
-CMD ["sh", "-c", "uvicorn ingestion_platform.api.main:app --host 0.0.0.0 --port ${PORT}"]
+# ---------------------------
+# Start server
+# ---------------------------
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT} --log-level info"]
