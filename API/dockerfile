@@ -1,8 +1,6 @@
 FROM python:3.11-slim
 
-# ---------------------------
 # System dependencies
-# ---------------------------
 RUN apt-get update && apt-get install -y \
     curl \
     gnupg \
@@ -14,51 +12,35 @@ RUN apt-get update && apt-get install -y \
     unixodbc-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# ---------------------------
-# Microsoft ODBC Driver repo
-# ---------------------------
+# Install Microsoft ODBC repo (CORRECT way)
 RUN curl -sSL https://packages.microsoft.com/keys/microsoft.asc \
-    | gpg --dearmor \
-    > /usr/share/keyrings/microsoft.gpg \
+    | gpg --dearmor > microsoft.gpg \
+    && install -o root -g root -m 644 microsoft.gpg /usr/share/keyrings/ \
     && curl -sSL https://packages.microsoft.com/config/debian/11/prod.list \
-    > /etc/apt/sources.list.d/mssql-release.list
+    > /etc/apt/sources.list.d/mssql-release.list \
+    && rm microsoft.gpg
 
-# ---------------------------
-# ODBC Driver (SQL Server)
-# ---------------------------
+# Install ODBC driver (USE 17 OR 18)
 RUN apt-get update && ACCEPT_EULA=Y apt-get install -y \
     msodbcsql17 \
     && rm -rf /var/lib/apt/lists/*
 
-# ---------------------------
-# Python security deps (bcrypt fix)
-# ---------------------------
-RUN pip install --no-cache-dir \
-    "bcrypt==4.1.2" \
-    "passlib[bcrypt]==1.7.4"
-
-# ---------------------------
 # Workdir
-# ---------------------------
 WORKDIR /app
 
-# ---------------------------
-# Python dependencies
-# ---------------------------
+# Python deps
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# ---------------------------
-# App source
-# ---------------------------
+# Copy app
 COPY . .
 
-# ---------------------------
-# Railway port config
-# ---------------------------
+# Railway requires PORT env - use it
 ENV PORT=8000
 
-# ---------------------------
-# Start server
-# ---------------------------
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT} --log-level info"]
+# Start app - FIXED: Use correct module path
+# Option A: If main.py is at root
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT}
+
+# Option B: If using ingestion_platform package structure
+# CMD uvicorn ingestion_platform.main:app --host 0.0.0.0 --port ${PORT}
