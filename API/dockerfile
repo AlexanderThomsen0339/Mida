@@ -1,6 +1,6 @@
-FROM python:3.13-slim
+FROM python:3.11-slim
 
-# --- System dependencies for ODBC + build tools ---
+# system deps
 RUN apt-get update && apt-get install -y \
     curl \
     gnupg2 \
@@ -10,14 +10,18 @@ RUN apt-get update && apt-get install -y \
     unixodbc \
     unixodbc-dev
 
-# Microsoft repo (stabil Debian 11 variant)
+# Microsoft repo (stabil Debian 11 version)
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
-    curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list
+    curl https://packages.microsoft.com/config/debian/11/prod.list \
+    > /etc/apt/sources.list.d/mssql-release.list
 
+# install driver
 RUN apt-get update && ACCEPT_EULA=Y apt-get install -y \
     msodbcsql17
 
-# --- App setup ---
+# verify driver exists (debug step)
+RUN odbcinst -q -d
+
 WORKDIR /app
 
 COPY requirements.txt .
@@ -25,5 +29,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# --- Railway-safe port binding ---
 CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port $PORT"]
