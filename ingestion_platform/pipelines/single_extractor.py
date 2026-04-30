@@ -3,7 +3,7 @@ Kalder en enkelt extractor i ingestion/sources/ og gemmer data i Laken.
 Bruges til manuel kørsel og test af en enkelt kilde, fx under udvikling.
 """
 import importlib
-from db.db_manager import get_source, Configuration_manager, log
+from shared.db_manager import get_source, Configuration_manager, log
 
 
 def get_ingestor_class(source_name: str):
