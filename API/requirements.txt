@@ -4,3 +4,4 @@ pyodbc
 python-dotenv
 pandas
 requests
+python-jose[cryptography]
