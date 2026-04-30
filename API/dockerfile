@@ -26,8 +26,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Railway bruger typisk 8080
-ENV PORT=8080
+# Sæt til port 8000 som Railway forventer
+ENV PORT=8000
 
-# Start app på 0.0.0.0:8080
+# Start app på port 8000
 CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT}"]
