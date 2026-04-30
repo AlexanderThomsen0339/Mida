@@ -59,7 +59,7 @@ def get_job_logs(job_id: int) -> list[dict]:
 
 # ---------------------------------------------------------------------------
 # Forbindelses-hjælper
-# ---------------------------------------------------------------------------
+# ------------------------------------------------------------- --------------
 def _build_connection_string() -> str:
     return (
         "DRIVER={ODBC Driver 17 for SQL Server};"
@@ -67,7 +67,8 @@ def _build_connection_string() -> str:
         f"DATABASE={os.environ.get('DB_NAME', 'Configuration_database')};"
         f"UID={os.environ['DB_USER']};"
         f"PWD={os.environ['DB_PASSWORD']};"
-        "TrustServerCertificate=yes;"
+        "Encrypt=yes;"
+        "TrustServerCertificate=no;"
     )
 
 
